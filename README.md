@@ -4,6 +4,8 @@ A [gulp](https://gulpjs.com/) plugin for [ESLint](https://eslint.org/)
 
 > **This is a fork by [Aptuitiv](https://www.aptuitiv.com) because the [original repository](github.com/adametry/gulp-eslint) is out of date.**
 
+[gulp-eslint-new](https://www.npmjs.com/package/gulp-eslint-new) is an alternate option if you need support for current eslint versions.
+
 ## Installation
 
 [Use](https://docs.npmjs.com/cli/install) [npm](https://docs.npmjs.com/getting-started/what-is-npm).
