@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0
+
+* Updated `eslint` dependency to `^8.0.0`;
+* Updated other package libraries to their latest version.
+* Updated the linting functions to work with version 8 of eslint.
+
 ## 6.0.0
 
 * Bump `eslint` dependency to ^6.0.0 <https://eslint.org/blog/2019/06/eslint-v6.0.0-released>
