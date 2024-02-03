@@ -1,6 +1,6 @@
 {
 	"name": "@aptuitiv/gulp-eslint",
-	"version": "6.0.0",
+	"version": "7.0.0",
 	"description": "A gulp plugin for processing files with ESLint",
 	"repository": "adametry/gulp-eslint",
 	"files": [
@@ -36,7 +36,8 @@
 	],
 	"author": "Adametry",
 	"contributors": [
-		"Shinnosuke Watanabe <snnskwtnb@gmail.com> (https://github.com/shinnn)"
+		"Shinnosuke Watanabe <snnskwtnb@gmail.com> (https://github.com/shinnn)",
+		"Eric Tompkins at Aptuitiv (https://github.com/aptuitiv)"
 	],
 	"license": "MIT",
 	"dependencies": {
