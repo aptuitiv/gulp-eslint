@@ -6,48 +6,47 @@
 
 [Use](https://docs.npmjs.com/cli/install) [npm](https://docs.npmjs.com/getting-started/what-is-npm).
 
-```
+```bash
 npm install gulp-eslint
 ```
 
 ## Usage
 
 ```javascript
-const {src, task} = require('gulp');
-const eslint = require('gulp-eslint');
+const { src, task } = require("gulp");
+const eslint = require("gulp-eslint");
 
-task('default', () => {
-    return src(['scripts/*.js'])
-        // eslint() attaches the lint output to the "eslint" property
-        // of the file object so it can be used by other modules.
-        .pipe(eslint())
-        // eslint.format() outputs the lint results to the console.
-        // Alternatively use eslint.formatEach() (see Docs).
-        .pipe(eslint.format())
-        // To have the process exit with an error code (1) on
-        // lint error, return the stream and pipe to failAfterError last.
-        .pipe(eslint.failAfterError());
+task("default", () => {
+ return (
+  src(["scripts/*.js"])
+   // eslint() attaches the lint output to the "eslint" property
+   // of the file object so it can be used by other modules.
+   .pipe(eslint())
+   // eslint.format() outputs the lint results to the console.
+   // Alternatively use eslint.formatEach() (see Docs).
+   .pipe(eslint.format())
+   // To have the process exit with an error code (1) on
+   // lint error, return the stream and pipe to failAfterError last.
+   .pipe(eslint.failAfterError())
+ );
 });
 ```
 
 Or use the plugin API to do things like:
 
 ```javascript
-gulp.src(['**/*.js','!node_modules/**'])
-	.pipe(eslint({
-		rules: {
-			'my-custom-rule': 1,
-			'strict': 2
-		},
-		globals: [
-			'jQuery',
-			'$'
-		],
-		envs: [
-			'browser'
-		]
-	}))
-	.pipe(eslint.formatEach('compact', process.stderr));
+gulp.src(["**/*.js", "!node_modules/**"])
+ .pipe(
+  eslint({
+   rules: {
+    "my-custom-rule": 1,
+    strict: 2,
+   },
+   globals: ["jQuery", "$"],
+   envs: ["browser"],
+  })
+ )
+ .pipe(eslint.formatEach("compact", process.stderr));
 ```
 
 For additional examples, look through the [example directory](https://github.com/adametry/gulp-eslint/tree/master/example).
@@ -56,9 +55,10 @@ For additional examples, look through the [example directory](https://github.com
 
 ### eslint()
 
-*No explicit configuration.* A `.eslintrc` file may be resolved relative to each linted file.
+_No explicit configuration._ A `.eslintrc` file may be resolved relative to each linted file.
 
 ### eslint(options)
+
 See [ESlint CLIEngine options](https://eslint.org/docs/developer-guide/nodejs-api#cliengine).
 
 #### options.rules
@@ -69,11 +69,11 @@ Set [configuration](https://eslint.org/docs/user-guide/configuring#configuring-r
 
 ```javascript
 {
-	"rules":{
-		"camelcase": 1,
-		"comma-dangle": 2,
-		"quotes": 0
-	}
+ "rules":{
+  "camelcase": 1,
+  "comma-dangle": 2,
+  "quotes": 0
+ }
 }
 ```
 
@@ -85,10 +85,10 @@ Specify global variables to declare.
 
 ```javascript
 {
-	"globals":[
-		"jQuery",
-		"$"
-	]
+ "globals":[
+  "jQuery",
+  "$"
+ ]
 }
 ```
 
@@ -134,7 +134,7 @@ Type: `Boolean`
 
 When `true`, add a result warning when ESLint ignores a file. This can be used to file files that are needlessly being loaded by `gulp.src`. For example, since ESLint automatically ignores "node_modules" file paths and gulp.src does not, a gulp task may take seconds longer just reading files from the "node_modules" directory.
 
-#### <a name="options.useEslintrc"></a>options.useEslintrc
+#### options.useEslintrc
 
 Type: `Boolean`
 
@@ -153,21 +153,22 @@ Type: `function (result) {}`
 Call a function for each ESLint file result. No returned value is expected. If an error is thrown, it will be wrapped in a Gulp PluginError and emitted from the stream.
 
 ```javascript
-gulp.src(['**/*.js','!node_modules/**'])
-	.pipe(eslint())
-	.pipe(eslint.result(result => {
-	    // Called for each ESLint result.
-	    console.log(`ESLint result: ${result.filePath}`);
-	    console.log(`# Messages: ${result.messages.length}`);
-	    console.log(`# Warnings: ${result.warningCount}`);
-	    console.log(`# Errors: ${result.errorCount}`);
-	}));
+gulp.src(["**/*.js", "!node_modules/**"])
+ .pipe(eslint())
+ .pipe(
+  eslint.result((result) => {
+   // Called for each ESLint result.
+   console.log(`ESLint result: ${result.filePath}`);
+   console.log(`# Messages: ${result.messages.length}`);
+   console.log(`# Warnings: ${result.warningCount}`);
+   console.log(`# Errors: ${result.errorCount}`);
+  })
+ );
 ```
 
 Type: `function (result, callback) { callback(error); }`
 
 Call an asynchronous function for each ESLint file result. The callback must be called for the stream to finish. If a value is passed to the callback, it will be wrapped in a Gulp PluginError and emitted from the stream.
-
 
 ### eslint.results(action)
 
@@ -178,14 +179,16 @@ Call a function once for all ESLint file results before a stream finishes. No re
 The results list has a "warningCount" property that is the sum of warnings in all results; likewise, an "errorCount" property is set to the sum of errors in all results.
 
 ```javascript
-gulp.src(['**/*.js','!node_modules/**'])
-	.pipe(eslint())
-	.pipe(eslint.results(results => {
-    	// Called once for all ESLint results.
-	    console.log(`Total Results: ${results.length}`);
-	    console.log(`Total Warnings: ${results.warningCount}`);
-	    console.log(`Total Errors: ${results.errorCount}`);
-	}));
+gulp.src(["**/*.js", "!node_modules/**"])
+ .pipe(eslint())
+ .pipe(
+  eslint.results((results) => {
+   // Called once for all ESLint results.
+   console.log(`Total Results: ${results.length}`);
+   console.log(`Total Warnings: ${results.warningCount}`);
+   console.log(`Total Errors: ${results.errorCount}`);
+  })
+ );
 ```
 
 Type: `function (results, callback) { callback(error); }`
@@ -198,9 +201,9 @@ Stop a task/stream if an ESLint error has been reported for any file.
 
 ```javascript
 // Cause the stream to stop(/fail) before copying an invalid JS file to the output directory
-gulp.src(['**/*.js','!node_modules/**'])
-	.pipe(eslint())
-	.pipe(eslint.failOnError());
+gulp.src(["**/*.js", "!node_modules/**"])
+ .pipe(eslint())
+ .pipe(eslint.failOnError());
 ```
 
 ### eslint.failAfterError()
@@ -209,9 +212,9 @@ Stop a task/stream if an ESLint error has been reported for any file, but wait f
 
 ```javascript
 // Cause the stream to stop(/fail) when the stream ends if any ESLint error(s) occurred.
-gulp.src(['**/*.js','!node_modules/**'])
-	.pipe(eslint())
-	.pipe(eslint.failAfterError());
+gulp.src(["**/*.js", "!node_modules/**"])
+ .pipe(eslint())
+ .pipe(eslint.failAfterError());
 ```
 
 ### eslint.format(formatter, output)
@@ -222,14 +225,14 @@ The `formatter` argument may be a `String`, `Function`, or `undefined`. As a `St
 
 ```javascript
 // use the default "stylish" ESLint formatter
-eslint.format()
+eslint.format();
 
 // use the "checkstyle" ESLint formatter
-eslint.format('checkstyle')
+eslint.format("checkstyle");
 
 // use the "eslint-path-formatter" module formatter
 // (@see https://github.com/Bartvds/eslint-path-formatter)
-eslint.format('node_modules/eslint-path-formatter')
+eslint.format("node_modules/eslint-path-formatter");
 ```
 
 The `output` argument may be a `WritableStream`, `Function`, or `undefined`. As a `WritableStream`, the formatter results will be written to the stream. If `undefined`, the formatter results will be written to [gulp’s log](https://github.com/gulpjs/gulp-util#logmsg). A `Function` will be called with the formatter results as the only parameter.
@@ -239,7 +242,7 @@ The `output` argument may be a `WritableStream`, `Function`, or `undefined`. As 
 eslint.format();
 
 // write messages to stdout
-eslint.format('junit', process.stdout)
+eslint.format("junit", process.stdout);
 ```
 
 ### eslint.formatEach(formatter, output)
@@ -248,10 +251,9 @@ Format each linted file individually. This should be used in the stream after pi
 
 The arguments for `formatEach` are the same as the arguments for `format`.
 
-
 ## Configuration
 
-ESLint may be configured explicity by using any of the following plugin options: `config`, `rules`, `globals`, or `env`. If the [useEslintrc option](#useEslintrc) is not set to `false`, ESLint will attempt to resolve a file by the name of `.eslintrc` within the same directory as the file to be linted. If not found there, parent directories will be searched until `.eslintrc` is found or the directory root is reached.
+ESLint may be configured explicity by using any of the following plugin options: `config`, `rules`, `globals`, or `env`. If the useEslintrc option is not set to `false`, ESLint will attempt to resolve a file by the name of `.eslintrc` within the same directory as the file to be linted. If not found there, parent directories will be searched until `.eslintrc` is found or the directory root is reached.
 
 ## Ignore Files
 
@@ -261,9 +263,9 @@ ESLint will also detect an `.eslintignore` file at the cwd or a parent directory
 
 ## Extensions
 
-ESLint results are attached as an "eslint" property to the vinyl files that pass through a Gulp.js stream pipeline. This is available to streams that follow the initial `eslint` stream. The [eslint.result](#result) and [eslint.results](#results) methods are made available to support extensions and custom handling of ESLint results.
+ESLint results are attached as an "eslint" property to the vinyl files that pass through a Gulp.js stream pipeline. This is available to streams that follow the initial `eslint` stream. The eslint.result and eslint.results methods are made available to support extensions and custom handling of ESLint results.
 
-#### Gulp-Eslint Extensions:
+### Gulp-Eslint Extensions
 
-* [gulp-eslint-if-fixed](https://github.com/lukeapage/gulp-eslint-if-fixed)
-* [gulp-eslint-threshold](https://github.com/krmbkt/gulp-eslint-threshold)
+- [gulp-eslint-if-fixed](https://github.com/lukeapage/gulp-eslint-if-fixed)
+- [gulp-eslint-threshold](https://github.com/krmbkt/gulp-eslint-threshold)
