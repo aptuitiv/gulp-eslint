@@ -1,7 +1,7 @@
 'use strict';
 
 const PluginError = require('plugin-error');
-const {CLIEngine} = require('eslint');
+const { ESLint } = require('eslint');
 const {
 	createIgnoreResult,
 	filterResult,
@@ -15,7 +15,7 @@ const {
 	tryResultAction,
 	writeResults
 } = require('./util');
-const {relative} = require('path');
+const { relative } = require('path');
 
 /**
  * Append ESLint result to each file
@@ -25,9 +25,9 @@ const {relative} = require('path');
  */
 function gulpEslint(options) {
 	options = migrateOptions(options) || {};
-	const linter = new CLIEngine(options);
+	const linter = new ESLint(options);
 
-	return transform((file, enc, cb) => {
+	return transform(async (file, enc, cb) => {
 		const filePath = relative(process.cwd(), file.path);
 
 		if (file.isNull()) {
@@ -40,7 +40,8 @@ function gulpEslint(options) {
 			return;
 		}
 
-		if (linter.isPathIgnored(filePath)) {
+		const isPathIgnored = await linter.isPathIgnored(filePath);
+		if (isPathIgnored) {
 			// Note:
 			// Vinyl files can have an independently defined cwd, but ESLint works relative to `process.cwd()`.
 			// (https://github.com/gulpjs/gulp/blob/master/docs/recipes/specifying-a-cwd.md)
@@ -48,7 +49,7 @@ function gulpEslint(options) {
 			// E.g., If ../.eslintignore has "foo/*.js", ESLint will ignore ./foo/*.js, instead of ../foo/*.js.
 			// Eslint rolls this into `CLIEngine.executeOnText`. So, gulp-eslint must account for this limitation.
 
-			if (linter.isPathIgnored(filePath) && options.warnFileIgnored) {
+			if (options.warnFileIgnored) {
 				// Warn that gulp.src is needlessly reading files that ESLint ignores
 				file.eslint = createIgnoreResult(file);
 			}
@@ -59,7 +60,8 @@ function gulpEslint(options) {
 		let result;
 
 		try {
-			result = linter.executeOnText(file.contents.toString(), filePath).results[0];
+			result = await linter.lintText(file.contents.toString(), { filePath });
+			result = result[0];
 		} catch (e) {
 			cb(new PluginError('gulp-eslint', e));
 			return;
@@ -69,7 +71,7 @@ function gulpEslint(options) {
 
 		if (options.quiet) {
 			// ignore warnings
-			file.eslint =  filterResult(result, options.quiet);
+			file.eslint = filterResult(result, options.quiet);
 		} else {
 			file.eslint = result;
 		}
@@ -109,7 +111,7 @@ gulpEslint.result = action => {
  * @param {Function} action - A function to handle all ESLint results
  * @returns {stream} gulp file stream
  */
-gulpEslint.results = function(action) {
+gulpEslint.results = function (action) {
 	if (typeof action !== 'function') {
 		throw new Error('Expected callable argument');
 	}
@@ -180,10 +182,13 @@ gulpEslint.failAfterError = () => {
  * @returns {stream} gulp file stream
  */
 gulpEslint.formatEach = (formatter, writable) => {
-	formatter = resolveFormatter(formatter);
 	writable = resolveWritable(writable);
 
-	return gulpEslint.result(result => writeResults([result], formatter, writable));
+	return gulpEslint.result(result => {
+		resolveFormatter(formatter).then(formatter => {
+			writeResults([result], formatter, writable)
+		});
+	});
 };
 
 /**
@@ -194,13 +199,13 @@ gulpEslint.formatEach = (formatter, writable) => {
  * @returns {stream} gulp file stream
  */
 gulpEslint.format = (formatter, writable) => {
-	formatter = resolveFormatter(formatter);
 	writable = resolveWritable(writable);
 
 	return gulpEslint.results(results => {
-		// Only format results if files has been lint'd
 		if (results.length) {
-			writeResults(results, formatter, writable);
+			resolveFormatter(formatter).then(formatter => {
+				writeResults(results, formatter.format, writable);
+			});
 		}
 	});
 };

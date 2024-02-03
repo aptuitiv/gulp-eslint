@@ -1,9 +1,9 @@
 'use strict';
 
-const {Transform} = require('stream');
+const { Transform } = require('stream');
 const PluginError = require('plugin-error');
 const fancyLog = require('fancy-log');
-const {CLIEngine} = require('eslint');
+const { ESLint } = require('eslint');
 
 /**
  * Convenience method for creating a transform stream in object mode
@@ -12,7 +12,7 @@ const {CLIEngine} = require('eslint');
  * @param {Function} [flush] - An async function that is called before closing the stream
  * @returns {stream} A transform stream
  */
-exports.transform = function(transform, flush) {
+exports.transform = function (transform, flush) {
 	if (typeof flush === 'function') {
 		return new Transform({
 			objectMode: true,
@@ -92,7 +92,7 @@ exports.handleCallback = (callback, value) => {
  * @param {(Object|Array)} result - An ESLint result or result list
  * @param {Function} done - An callback for when the action is complete
  */
-exports.tryResultAction = function(action, result, done) {
+exports.tryResultAction = function (action, result, done) {
 	try {
 		if (action.length > 1) {
 			// async action
@@ -204,30 +204,25 @@ exports.filterResult = (result, filter) => {
 		fixableWarningCount: messages.reduce(countFixableWarningMessage, 0),
 	};
 
-  if (result.output !== undefined) {
-    newResult.output = result.output;
-  } else {
-    newResult.source = result.source;
-  }
+	if (result.output !== undefined) {
+		newResult.output = result.output;
+	} else {
+		newResult.source = result.source;
+	}
 
-  return newResult;
+	return newResult;
 };
 
 /**
  * Resolve formatter from unknown type (accepts string or function)
  *
  * @throws TypeError thrown if unable to resolve the formatter type
- * @param {(String|Function)} [formatter=stylish] - A name to resolve as a formatter. If a function is provided, the same function is returned.
- * @returns {Function} An ESLint formatter
+ * @param {string} [formatter=stylish] - A name to resolve as a formatter.
+ * @returns {Promise<ESLint.Formatter>} An ESLint formatter
  */
-exports.resolveFormatter = (formatter) => {
-	// use ESLint to look up formatter references
-	if (typeof formatter !== 'function') {
-		// load formatter (module, relative to cwd, ESLint formatter)
-		formatter =	CLIEngine.getFormatter(formatter) || formatter;
-	}
-
-	return formatter;
+exports.resolveFormatter = async (formatter) => {
+	const lint = new ESLint();
+	return await lint.loadFormatter(formatter);
 };
 
 /**
