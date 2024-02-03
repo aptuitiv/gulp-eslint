@@ -40,7 +40,7 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"eslint": "^8.56.0",
+		"eslint": "^8.0.0",
 		"fancy-log": "^2.0.0",
 		"plugin-error": "^2.0.1"
 	},
